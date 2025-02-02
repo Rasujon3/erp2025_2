@@ -478,7 +478,6 @@
             // Example delete handler
             // Show modal and set currency ID on delete button click
             $(document).on('click', '.delete-currency', function() {
-                console.log('clicked')
                 const id = $(this).data('id'); // Get the currency ID
                 $('#deleteCardModal').modal('show'); // Show the modal
                 $('#confirmDelete').data('id', id); // Attach the ID to the confirm button
@@ -577,7 +576,6 @@
                             orderable: false,
                             searchable: false,
                             render: function(data, type, row) {
-                                console.log(row)
                                 // Replace ':id' with the actual row.id dynamically
                                 const viewRoute = "{{ route('lead.source.view', ['leadSource' => ':id']) }}";
                                 const url = viewRoute.replace(':id', row.id);
