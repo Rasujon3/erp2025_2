@@ -74,7 +74,7 @@ class LeadSourceController extends AppBaseController
     {
         try {
             // Delegate creation to repository
-            $this->leadSourceRepository->store($request->validated());
+            $this->leadSourceRepository->store($request->all());
 
             // Redirect with success message
             return redirect()->route('lead.source.index')->with('success', 'Lead Source created successfully!');

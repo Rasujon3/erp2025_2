@@ -4,15 +4,18 @@ namespace App\Modules\Leads\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Admin\Models\Country;
+use App\Modules\Leads\Models\Lead;
 use App\Modules\Leads\Models\LeadSource;
 use App\Modules\Leads\Models\LeadStatus;
+use App\Modules\Leads\Queries\LeadsDatatable;
 use App\Modules\Leads\Queries\LeadSourceDatatable;
 use App\Modules\Leads\Queries\LeadStatusDatatable;
 use App\Modules\Leads\Repositories\LeadSourceRepository;
+use App\Modules\Leads\Repositories\LeadsRepository;
 use App\Modules\Leads\Repositories\LeadStatusRepository;
 use App\Modules\Leads\Requests\LeadSourceRequest;
+use App\Modules\Leads\Requests\LeadsRequest;
 use App\Modules\Leads\Requests\LeadStatusRequest;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\View;
@@ -24,25 +27,26 @@ use App\Modules\Admin\Queries\CountryDatatable;
 use App\Helpers\ActivityLogger;
 use App\Http\Controllers\AppBaseController;
 
-class LeadStatusController extends AppBaseController
+class LeadController extends AppBaseController
 {
-    protected $leadStatusRepository;
-    protected $leadStatusDatatable;
+    protected $leadsRepository;
+    protected $leadsDatatable;
 
     // Inject the repository using the constructor
-    public function __construct(LeadStatusRepository $leadStatusRepository, LeadStatusDatatable $leadStatusDatatable)
+    public function __construct(LeadsRepository $leadsRepository, LeadsDatatable $leadsDatatable)
     {
-        $this->leadStatusRepository = $leadStatusRepository;
-        $this->leadStatusDatatable = $leadStatusDatatable;
+        $this->leadsRepository = $leadsRepository;
+        $this->leadsDatatable = $leadsDatatable;
     }
 
     public function getGridView(Request $request)
     {
         try {
             if ($request->ajax()) {
-                return $this->leadStatusDatatable->getGridData($request);
+//                dd('$this->leadsDatatable->getGridData($request)',$this->leadsDatatable->getGridData($request));
+                return $this->leadsDatatable->getGridData($request);
             }
-        }  catch (Exception $e) {
+        }  catch (\Exception $e) {
             Log::error('Error fetching lead sources: ' . $e->getMessage(), [
                 'line' => $e->getLine(),
                 'file' => $e->getFile(),
@@ -50,14 +54,14 @@ class LeadStatusController extends AppBaseController
             return response()->json(['error' => 'An unexpected error occurred while fetching lead sources. [LSSC-001]'], 500);
         }
     }
-    public function getAllLeadStatuses(Request $request)
+    public function getAllLeads(Request $request)
     {
         try {
             if ($request->ajax()) {
-                return LeadStatusDatatable::getDataForDatatable();
+                return LeadsDatatable::getDataForDatatable();
             }
             return response()->json(['error' => 'Invalid request type.'], 400);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Error fetching lead sources: ' . $e->getMessage(), [
                 'line' => $e->getLine(),
                 'file' => $e->getFile(),
@@ -67,23 +71,23 @@ class LeadStatusController extends AppBaseController
     }
     public function index()
     {
-        return view('leads::leadStatus.index');
+        return view('leads::leads.index');
     }
 
     public function create()
     {
-        return view('leads::leadStatus.create');
+        return view('leads::leads.create');
     }
 
-    public function store(LeadStatusRequest $request)
+    public function store(LeadsRequest $request)
     {
         try {
             // Delegate creation to repository
-            $this->leadStatusRepository->store($request->all());
+            $this->leadsRepository->store($request->all());
 
             // Redirect with success message
             return redirect()->route('lead.status.index')->with('success', 'Lead Status created successfully!');
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // Log error with more details
             Log::error('Lead Status Store Error: ' . $e->getMessage(), [
                 'line' => $e->getLine(),
@@ -96,8 +100,8 @@ class LeadStatusController extends AppBaseController
     public function edit(LeadStatus $leadStatus)
     {
         try {
-            return view('leads::leadStatus.edit', compact('leadStatus'));
-        } catch (Exception $e) {
+            return view('leads::leads.edit', compact('leadStatus'));
+        } catch (\Exception $e) {
             Log::error('Lead Status Edit Error: ' . $e->getMessage(), [
                 'line' => $e->getLine(),
                 'file' => $e->getFile(),
@@ -107,18 +111,18 @@ class LeadStatusController extends AppBaseController
     }
     public function updateCountry(Request $request)
     {
-        $response = $this->leadStatusRepository->updateFromDataTable($request->all());
+        $response = $this->leadsRepository->updateFromDataTable($request->all());
         return $this->sendResponse($response, 'Country updated successfully');
     }
 
-    public function destroy(LeadStatus $leadStatus)
+    public function destroy(Lead $lead)
     {
         try {
-            $this->leadStatusRepository->delete($leadStatus);
-            Flash::success('Lead Status deleted successfully!');
-            return $this->sendSuccess('Lead Status deleted successfully');
-        } catch (Exception $e) {
-            Log::error('Lead Source delete Error: ' . $e->getMessage(), [
+            $this->leadsRepository->delete($lead);
+            Flash::success('Lead deleted successfully!');
+            return $this->sendSuccess('Lead deleted successfully');
+        } catch (\Exception $e) {
+            Log::error('Lead delete Error: ' . $e->getMessage(), [
                 'line' => $e->getLine(),
                 'file' => $e->getFile(),
             ]);
@@ -128,8 +132,8 @@ class LeadStatusController extends AppBaseController
     public function view(LeadStatus $leadStatus)
     {
         try {
-            return view('leads::leadStatus.view', compact(['leadStatus']));
-        } catch (Exception $e) {
+            return view('leads::leads.view', compact(['leadStatus']));
+        } catch (\Exception $e) {
             Log::error('Lead Status View Error: ' . $e->getMessage(), [
                 'line' => $e->getLine(),
                 'file' => $e->getFile(),
@@ -137,12 +141,12 @@ class LeadStatusController extends AppBaseController
             return redirect()->back()->with('error', 'Something went wrong. Please try again. [LSSC-006]');
         }
     }
-    public function update(LeadStatusRequest $request, LeadStatus $leadStatus)
+    public function update(LeadsRequest $request, Lead $lead)
     {
         try {
-            $this->leadStatusRepository->update($leadStatus, $request->all());
+            $this->leadsRepository->update($lead, $request->all());
             return redirect()->route('lead.status.index')->with('success', 'Lead Status updated successfully!');
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('Lead Status Update Error: ' . $e->getMessage(), [
                 'line' => $e->getLine(),
                 'file' => $e->getFile(),

@@ -25,7 +25,7 @@ class Country extends Model
     public static function rules($currencyId = null)
     {
         return [
-            'code' => 'required|string|max:45|unique:countries,code,' . $currencyId,
+            'code' => 'required|string|max:45|unique:countries,code,' . $currencyId, // unique:table_name,column_name,except_id
             'name' => 'required|string|max:191',
             'drafted_at' => 'nullable|date',
             'is_default' => 'nullable',

@@ -4,6 +4,7 @@ namespace App\Modules\Leads\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LeadStatus extends Model
 {
@@ -23,8 +24,8 @@ class LeadStatus extends Model
             'order' => 'required',
         ];
     }
-    //    public function leads(): HasMany
-//    {
-//        return $this->hasMany(Lead::class, 'status_id');
-//    }
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class, 'status_id');
+    }
 }

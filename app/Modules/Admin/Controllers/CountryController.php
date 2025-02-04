@@ -35,10 +35,8 @@ class CountryController extends AppBaseController
     }
     public function getCountriesDataTable(Request $request)
     {
-        if ($request->ajax()) {
-            if ($request->ajax()) {
-                return CountryDatatable::getDataForDatatable();
-            }
+        if ($request->ajax() && $request->ajax()) {
+            return CountryDatatable::getDataForDatatable();
         }
     }
     public function index()
